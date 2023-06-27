@@ -1,56 +1,159 @@
 import styled from "styled-components";
+import { useEffect } from "react";
+import { auth, provider } from "../firebase";
+import { useDispatch , useSelector } from "react-redux";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { selectUserName,selectUserEmail,selectUserPhoto, setUserLoginDetails, setSignOutState } from "../features/users/userSlice";
 
-const Header = (props) => {
+
+ const Header = (props) => {
+
+    const dispatch = useDispatch()
+    const history = useHistory()
+    const userName = useSelector(selectUserName)
+    const userPhoto = useSelector(selectUserPhoto)
+    const userEmail = useSelector(selectUserEmail)
+
+     useEffect(() => {
+        auth.onAuthStateChanged(async (user) => {
+            if(user) {
+                setUser(user)
+                history.push("/home")
+            }
+        })
+    }, [userName])
+    const handleAuth = () => {
+        if(!userName){
+            auth.signInWithPopup(provider).then((result)=>{
+                setUser(result.user);
+                console.log(result.user.photoURL)
+            }).catch((error)=>{
+                alert(error);
+            });
+        }else if (userName){
+            auth.signOut().then(()=>{
+                dispatch(setSignOutState());
+                history.push('/')
+            })
+        }
+        
+
+    }
+
+    const setUser = (user) => {
+        dispatch(
+            setUserLoginDetails({
+                name : user.displayName,
+                email : user.email,
+                photo : user.photoURL,
+            })
+        )
+    }
     return(
         <Nav>
             <Logo>
                 <img src='./images/logo.svg' alt="Disney+"/>   
             </Logo> 
-            
-            <NavMenu>
-                <a href="/home">
-                    <img src="/images/home-icon.svg" alt="Home" />
-                    <span>
-                        HOME
-                    </span>
-                </a>
+            {!userName ? <Login onClick={handleAuth}>Login</Login> 
+            : 
+            <>
+                <NavMenu>
+                    <a href="/home">
+                        <img src="/images/home-icon.svg" alt="Home" />
+                        <span>
+                            HOME
+                        </span>
+                    </a>
 
-                <a href="/home">
-                    <img src="/images/search-icon.svg" alt="Home" />
-                    <span>
-                        SEARCH
-                    </span>
-                </a>
-                <a href="/home">
-                    <img src="/images/watchlist-icon.svg" alt="Home" />
-                    <span>
-                        WATCHLIST
-                    </span>
-                </a>
-                <a href="/home">
-                    <img src="/images/original-icon.svg" alt="Home" />
-                    <span>
-                        ORIGINALS
-                    </span>
-                </a>
-                <a href="/home">
-                    <img src="/images/movie-icon.svg" alt="Home" />
-                    <span>
-                        MOVIES
-                    </span>
-                </a>
-                <a href="/home">
-                    <img src="/images/series-icon.svg" alt="Home" />
-                    <span>
-                        SERIES
-                    </span>
-                </a>
-                
-            </NavMenu>
+                    <a href="/home">
+                        <img src="/images/search-icon.svg" alt="Home" />
+                        <span>
+                            SEARCH
+                        </span>
+                    </a>
+                    <a href="/home">
+                        <img src="/images/watchlist-icon.svg" alt="Home" />
+                        <span>
+                            WATCHLIST
+                        </span>
+                    </a>
+                    <a href="/home">
+                        <img src="/images/original-icon.svg" alt="Home" />
+                        <span>
+                            ORIGINALS
+                        </span>
+                    </a>
+                    <a href="/home">
+                        <img src="/images/movie-icon.svg" alt="Home" />
+                        <span>
+                            MOVIES
+                        </span>
+                    </a>
+                    <a href="/home">
+                        <img src="/images/series-icon.svg" alt="Home" />
+                        <span>
+                            SERIES
+                        </span>
+                    </a>
+                    
+                </NavMenu>
+                <SignOut>
+                    <UserImage src = {userPhoto} alt= {userName}/>
+                    <DropDown>
+                        <span onClick={handleAuth}>SignOut</span>
+                    </DropDown>
+                </SignOut>
+              </>}
+            
         </Nav>
     )
 
 };
+
+const UserImage = styled.img`
+    height: 100%;
+    
+
+`;  
+
+const DropDown = styled.div`
+  position: absolute;
+  top: 48px;
+  right: 0px;
+  background: rgb(19, 19, 19);
+  border: 1px solid rgba(151, 151, 151, 0.34);
+  border-radius: 4px;
+  box-shadow: rgb(0 0 0 / 50%) 0px 0px 18px 0px;
+  padding: 10px;
+  font-size: 14px;
+  letter-spacing: 3px;
+  width: 100px;
+  opacity: 0;
+`;
+
+const SignOut = styled.div`
+  position: relative;
+  height: 48px;
+  width: 48px;
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+
+  ${UserImage} {
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+  }
+
+  &:hover {
+    ${DropDown} {
+      opacity: 1;
+      transition-duration: 1s;
+    }
+  }
+`;
+
 
 const Nav = styled.nav`
   position: fixed;
@@ -146,6 +249,25 @@ const NavMenu = styled.div`
   /* @media (max-width: 768px) {
     display: none;
   } */
+`;
+
+const Login = styled.a `
+  background-color: rbg(0,0,0,0.6);
+  padding : 8px 16px;
+  text-transformation : uppercase;
+  border : 1px solid #f9f9f9;
+  border-radius : 4px;
+  letter-spacing : 1.5px;
+  transition : all 0.2s ease 0;
+
+  &:hover{
+    background-color : #f9f9f9;
+    color : black;
+    border-color : transparent ;
+
+  }
+
+  
 `;
 
 
