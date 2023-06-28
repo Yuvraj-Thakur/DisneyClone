@@ -1,6 +1,10 @@
 import styled from 'styled-components';
 import ImageSlider from './ImageSlider';
 import Viewers from './Viewers';
+import Recomended from './Recomended';
+import NewDisney from './NewDisney';
+import Trending from './Trending';
+import Originals from './Originals';
 
 
 const Home = (props) => {
@@ -8,6 +12,10 @@ const Home = (props) => {
         <Container>
             <ImageSlider/>
             <Viewers/>
+            <Recomended/>
+            <NewDisney/>
+            <Trending/>
+            <Originals/>
         </Container>
     )
 }
